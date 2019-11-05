@@ -1,0 +1,16 @@
+{
+  "name": "sld2lyrx",
+  "version": "1.0.0",
+  "description": "Convert OpenGIS Styled Layer Descriptor (SLD) to ESRI ArcGIS Server LYRX format",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "tinycolor2": "^1.4.1",
+    "xml2js": "^0.4.22"
+  }
+}
