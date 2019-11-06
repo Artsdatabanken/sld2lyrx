@@ -3,12 +3,12 @@ const path = require("path");
 const tinycolor = require("tinycolor2");
 
 const fieldName = "code";
-const sourceFile = "Landskap.sld";
-const strokeColor = "#4af";
+const sourceFile = "landskap.sld";
 
 const name = path.parse(sourceFile).name;
 
 const template = JSON.parse(fs.readFileSync("template.lyrx.json"));
+const srcLayers = JSON.parse(fs.readFileSync("la_farger.json"));
 
 template.uRI = `CIMPATH=map/${name}.xml`;
 const layerDef = template.layerDefinitions[0];
@@ -28,23 +28,35 @@ const { renderer } = layerDef;
 renderer.fields = [fieldName];
 const { groups } = renderer;
 const group = groups[0];
-const class0 = group.classes[0];
+const templateClass = group.classes[0];
+group.classes = [];
 
-class0.label = "LA-I-D";
-class0.values[0].fieldValues = "LA-I-D";
-class0.symbol.symbol.symbolLayers.forEach(sm => {
-  switch (sm.type) {
-    case "CIMSolidStroke":
-      sm.color.values = toEsriColor(strokeColor);
-      break;
-    case "CIMSolidFill":
-      sm.color.values = toEsriColor("#ff00ff");
-      break;
-  }
+Object.keys(srcLayers).forEach(name => {
+  const color = srcLayers[name].farge;
+  name = name.replace("NN-", "");
+  const newClass = JSON.parse(JSON.stringify(templateClass));
+  newClass.label = name;
+  newClass.values[0].fieldValues = [name];
+  newClass.symbol.symbol.symbolLayers.forEach(sm => {
+    switch (sm.type) {
+      case "CIMSolidStroke":
+        sm.color.values = toEsriColor(strokeColor(color));
+        break;
+      case "CIMSolidFill":
+        sm.color.values = toEsriColor(color);
+        break;
+    }
+  });
+  group.classes.push(newClass);
 });
+
 console.log(JSON.stringify(template));
+
+function strokeColor(color) {
+  return new tinycolor(color).darken(40);
+}
 
 function toEsriColor(color) {
   const tc = new tinycolor(color);
-  return [tc._r, tc._g, tc._b, 100];
+  return [Math.round(tc._r), Math.round(tc._g), Math.round(tc._b), 100];
 }
